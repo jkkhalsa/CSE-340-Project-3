@@ -1,0 +1,16 @@
+tests/test_comments_01.txt
+tests/test_parsing_error03.txt
+tests/
+a.out
+inputbuf.o
+lexer.o
+tester.txt
+.vscode/settings.json
+parser.o
+variable.o
+parser.o
+.vscode/launch.json
+test_names_02.txt
+test_parsing_error01.txt
+test_parsing_ok02.txt
+test_parsing_ok03.txt
