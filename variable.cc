@@ -3,6 +3,8 @@
 
 using namespace std;
 
+string reservedTypes[] = {"UNKNOWN", "INT", "REAL", "BOOL"};
+
 string Variable::printVariable(){
     if(scope == ":"){
         return scope + ':' + name;

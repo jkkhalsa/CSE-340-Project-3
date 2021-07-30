@@ -4,11 +4,20 @@
 #include <vector>
 #include <iostream>
 
+//type types
+
+typedef enum {UNKNOWN = 0,
+    REAL,
+    INT,
+    BOOL
+} VariableType;
+
 class Variable{
 
     public:
     std::string scope;
     std::string name;
+    VariableType type;
     bool isPublic;
 
     std::string printVariable();
