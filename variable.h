@@ -20,6 +20,7 @@ class Variable{
     VariableType type;
     bool isPublic;
 
+    Variable();
     std::string printVariable();
 };
 

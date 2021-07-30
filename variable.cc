@@ -5,6 +5,12 @@ using namespace std;
 
 string reservedTypes[] = {"UNKNOWN", "INT", "REAL", "BOOL"};
 
+
+Variable::Variable(){
+    type = UNKNOWN;
+}
+
+
 string Variable::printVariable(){
     if(scope == ":"){
         return scope + ':' + name;
