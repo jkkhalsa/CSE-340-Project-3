@@ -15,10 +15,9 @@ typedef enum {UNKNOWN = 0,
 class Variable{
 
     public:
-    std::string scope;
     std::string name;
     VariableType type;
-    bool isPublic;
+    int unknownNum;
 
     Variable();
     std::string printVariable();
@@ -27,11 +26,14 @@ class Variable{
 class VariableList{
 
     public:
-    std::vector <Variable> list;
+    std::vector <Variable> knownList;
+    std::vector <Variable> unknownList;
+    int nextUnknown;
+
 
     VariableList();
-    void addVariable(std::string, std::string, bool); 
-    void eraseScope(std::string);
+    void addKnownVariable(std::string name, VariableType type); 
+    void addUnknownVariable(std::string name, int declareUnknown);
     Variable searchList(std::string, std::string);
     
     void printVariableList();

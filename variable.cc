@@ -12,10 +12,21 @@ Variable::Variable(){
 
 
 string Variable::printVariable(){
-    if(scope == ":"){
-        return scope + ':' + name;
+    string temp = "";
+    if(type != UNKNOWN){
+        temp = name + ": ";
+        switch(type){
+            case INT:
+                temp += "int";
+            case REAL:
+                temp += "real";
+            case BOOL:
+                temp += "bool";
+        }
+        temp += "#\n";
+        return temp;
     }
-    return scope + '.' + name;
+    
 }
 
 
@@ -23,34 +34,40 @@ VariableList::VariableList(){
 
 }
 
-//scope, name, isPublic?
-void VariableList::addVariable(string s, string n, bool p){
+//name, type
+void VariableList::addKnownVariable(string n, VariableType t){
     //create new variable
     Variable variable;
-    variable.scope = s;
     variable.name = n;
-    variable.isPublic = p;
+    variable.type = t;
+    variable.unknownNum = 0;
 
     //add it to the symbol table
-    list.push_back(variable);
+    knownList.push_back(variable);
     return;
 }
 
-//goes through the variable list and erases the ones belonging to the scope we just exited
-void VariableList::eraseScope(string deletingScope){
-    for(int i = 0; i < (int)list.size(); i++){
-        if(list[i].scope == deletingScope){
-            list.erase(list.begin() + i);
-            i--;
-        }
+//name, type, number (if one is known){
+void VariableList::addUnknownVariable(string n, int u){
+    //create new variable
+    Variable variable;
+    variable.name = n;
+    variable.type = UNKNOWN;
+    if(u != 0){
+        variable.unknownNum = u;
     }
-    //printVariableList();
-    return;
+    else{
+        variable.unknownNum = nextUnknown;
+        nextUnknown++;
+    }
 }
 
-//Search through our symbol table to see where the one that just got called is at
-//pass current scope, then variable name we're looking for
-Variable VariableList::searchList(string currentScope, string variableName){
+
+
+/*
+//Search through our known list to see if a variable type is already known
+//if not, we return UNKNOWN and can search the unknown list
+Variable VariableList::searchKnownList(string currentScope, string variableName){
     for(int i = list.size()-1; i >= 0; i--){
         if(list[i].name == variableName){
             if(list[i].scope == currentScope || list[i].isPublic || list[i].scope == ":"){
@@ -67,8 +84,8 @@ Variable VariableList::searchList(string currentScope, string variableName){
 }
 
 void VariableList::printVariableList(){
-    for(auto elem : list){
+    for(auto elem : knownList){
         cout << elem.printVariable() << "\n";
     }
     return;
-}
+}*/
