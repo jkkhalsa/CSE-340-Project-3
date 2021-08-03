@@ -113,7 +113,7 @@ void Parser::parseVarList(){
     //a var list MUST start with an ID
     if(token.token_type == ID){
         //if we've got an ID, add it as a variable with all the niceties
-        symbolTable.addVariable(scopeList.back(), token.lexeme, currentlyPublic);
+        //symbolTable.addVariable(scopeList.back(), token.lexeme, currentlyPublic);
         index++;  //we've now made sense of this token
     }
     else{
@@ -152,7 +152,7 @@ void Parser::parseScope(){
     //past the statement list, now do we have an rbrace?
     expect(RBRACE);
     //we've hit an rbrace - that means we need to delete all the variables belonging to this scope
-    symbolTable.eraseScope(scopeList.back());
+    //symbolTable.eraseScope(scopeList.back());
     //and now delete this from our list of nested scopes
     scopeList.pop_back();
     return;
@@ -261,8 +261,10 @@ int main()
         }
     }
 
+    parser->printTokenList();
+
     //parse that list into actual output
-    parser->parseProgram();
-    cout << parser->output;
+    //parser->parseProgram();
+    //cout << parser->output;
     return 1;
 }

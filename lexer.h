@@ -13,10 +13,12 @@
 
 // ------- token types -------------------
 
-typedef enum { END_OF_FILE = 0,
-    PUBLIC, PRIVATE, 
-    EQUAL, COLON, COMMA, SEMICOLON,
-    LBRACE, RBRACE, ID, ERROR // TODO: Add labels for new token types here
+typedef enum { END_OF_FILE, INT, REAL, BOOL,
+  TR, FA, IF, WHILE, SWITCH, CASE, PUBLIC, PRIVATE,
+  NUM, REALNUM, NOT, PLUS, MINUS, MULT, DIV, GTEQ,
+  GREATER, LTEQ, NOTEQUAL, LESS, LPAREN, RPAREN,
+  EQUAL, COLON, COMMA, SEMICOLON, LBRACE, RBRACE,
+  ID, ERROR
 } TokenType;
 
 class Token {
@@ -33,11 +35,9 @@ class LexicalAnalyzer {
     Token GetToken();
     TokenType UngetToken(Token);
     LexicalAnalyzer();
-    Token Peek(int);
 
   private:
     std::vector<Token> tokens;
-    int index;
     int line_no;
     Token tmp;
     InputBuffer input;
@@ -45,9 +45,7 @@ class LexicalAnalyzer {
     bool SkipSpace();
     bool SkipComments();
     bool IsKeyword(std::string);
-    bool IsVisibility(std::string);
     TokenType FindKeywordIndex(std::string);
-    TokenType FindVisibilityIndex(std::string);
     Token ScanIdOrKeyword();
     Token ScanNumber();
 };
