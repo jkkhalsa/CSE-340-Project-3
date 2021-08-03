@@ -13,7 +13,7 @@
 
 // ------- token types -------------------
 
-typedef enum { END_OF_FILE, INT, REAL, BOOL,
+typedef enum { END_OF_FILE,
   TR, FA, IF, WHILE, SWITCH, CASE, PUBLIC, PRIVATE,
   NUM, REALNUM, NOT, PLUS, MINUS, MULT, DIV, GTEQ,
   GREATER, LTEQ, NOTEQUAL, LESS, LPAREN, RPAREN,

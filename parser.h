@@ -17,7 +17,10 @@ class Parser{
     Token expect(TokenType);
     void parseProgram();
     void parseGlobalVars();
+    void parseVarDeclList();
+    void parseVarDecl();
     void parseVarList();
+    void parseBody();
     void parseScope();
     void parsePublicVars();
     void parsePrivateVars();

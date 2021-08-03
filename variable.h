@@ -26,15 +26,15 @@ class Variable{
 class VariableList{
 
     public:
-    std::vector <Variable> knownList;
-    std::vector <Variable> unknownList;
+    std::vector <Variable> list;
     int nextUnknown;
 
 
     VariableList();
     void addKnownVariable(std::string name, VariableType type); 
     void addUnknownVariable(std::string name, int declareUnknown);
-    Variable searchList(std::string, std::string);
+    void resolveUnknownVariables(int beingResolved, int resolvingTo, VariableType newType);
+    Variable searchList(std::string);
     
     void printVariableList();
 
