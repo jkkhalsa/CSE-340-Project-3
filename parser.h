@@ -18,20 +18,18 @@ class Parser{
     void parseProgram();
     void parseGlobalVars();
     void parseVarDeclList();
-    void parseVarDecl();
-    void parseVarList();
+    void parseVarList(VariableType);
     void parseBody();
-    void parseScope();
-    void parsePublicVars();
-    void parsePrivateVars();
     void parseStmtList();
-    void parseStmt();
+    void parseAssignment();
+    VariableType parseExpression();
+    void parseIf();
+    void parseWhile();
+    void parseSwitch();
     void printTokenList();
 
     private:
     int index; //how far along in the token list we are
-    bool currentlyPublic;
-    std::vector<std::string> scopeList;
 
     void SyntaxError();
 };

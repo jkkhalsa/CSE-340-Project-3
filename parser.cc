@@ -99,9 +99,18 @@ void Parser::parseProgram(){
 }
 
 void Parser::parseGlobalVars(){
-    VariableType currentType;
     //variables are defined in here so we'll be working closely with the var class
+    //we have the variable type now we can make the symbol table of variables here
+    
+
+
+}
+
+void Parser::parseVarDeclList(){
+    //can either be a single declaration or a list of them
+    //will always start with a single declaration, or rather an ID
     //first we need to see what type this line of variables will be
+    VariableType currentType;
     int i = 1;
     while(Peek(i).token_type != COLON){
         i++;
@@ -123,20 +132,113 @@ void Parser::parseGlobalVars(){
             currentType == BOOL;
         }
     }
-    //we have the variable type now we can make the symbol table of variables here
-    
+    parseVarList(currentType);
+    expect(COLON);
+    expect(ID);
+    expect(SEMICOLON);
 
+    //now that we've parsed this list, we either have another list or the body
+    //check
+    if(Peek(1).token_type == LBRACE){
+        parseBody();
+    }
+    else if(Peek(1).token_type == ID){
+        parseVarDeclList();
+    }
+    else{
+        SyntaxError();
+    }
 
 }
 
-void Parser::parseVarDeclList(){
-    //can either be a single declaration or a list of them
-    //will always start with a single declaration, or rather an ID
-
+void Parser::parseVarList(VariableType currentType){
+    //a var list goes ID-COMMA-ID-COMMA until it hits a colon
+    token = tokenList[index];
+    if(tokenList[index].token_type != ID){
+        SyntaxError();
+    }
+    else{
+        //it's an ID, so a variable
+        symbolTable.addKnownVariable(token.lexeme, currentType);
+        //we've now made sense of this token
+        index++;
+        expect(COMMA);
+    }
+    token = Peek(1);
+    if(token.token_type == COLON){
+        //going back up to the var declaration list
+        return;
+    }
+    else if(token.token_type == ID){
+        parseVarList(currentType);
+    }
+    else{
+        SyntaxError();
+    }
 }
 
 void Parser::parseBody(){
+    //we should start with a lbrace
+    expect(LBRACE);
+    //good now that's over with
+    //now statements wheeeeee
+    parseStmtList();
+    expect(RBRACE);
+    return;
+}
 
+void Parser::parseStmtList(){
+    //we can come into a statement list completely fucked up, so make sure this is one
+    //can start with an ID, an IF, a While, or a Switch
+    token = tokenList[index];
+    if(!(token.token_type == ID || token.token_type == IF || token.token_type == WHILE || token.token_type == SWITCH)){
+        SyntaxError();
+    }
+    //ok good we've confirmed this is a proper statement list
+    //check for assignment statement
+    if(token.token_type == ID){
+        parseAssignment();
+    }
+    else if(token.token_type == IF){
+        parseIf();
+    }
+    else if(token.token_type == WHILE){
+        parseWhile();
+    }
+    else if(token.token_type == SWITCH){
+        parseSwitch();
+    }
+    //statement list will always have either another statement list after it or the end of the body
+    if(Peek(1).token_type != RBRACE){
+        parseStmtList();
+    }
+    return;
+}
+
+void Parser::parseAssignment(){
+    Variable leftHand;
+    VariableType rightHandType;
+    token = tokenList[index];
+    //an assignment statement will always be ID equals EXPRESSION ;
+    //we already checked if this is an ID before calling this
+    //get the left side of the expression into the variable list
+    leftHand = symbolTable.searchList(token.lexeme);
+    index++;
+
+    expect(EQUAL);
+
+    //now parse the expression on the right hand side
+    rightHandType = parseExpression();
+
+    //check and make sure we don't have a type error C1
+    if(rightHandType != leftHand.type){
+        cout << "TYPE MISMATCH " << token.line_no << " C1\n";
+        exit(1);
+    }
+    //TODO: figure out unknown cleanup here
+    
+    expect(SEMICOLON);
+    return;
 }
 
 
@@ -148,7 +250,7 @@ int main()
 
     token = lexer.GetToken();
     if(token.token_type != ERROR){  //is this cheating? yup 100%
-         parser->tokenList.push_back(token); //add what we just determined to the end of the token list
+        parser->tokenList.push_back(token); //add what we just determined to the end of the token list
     }
 
     //find the list of tokens
@@ -156,7 +258,7 @@ int main()
     {
         token = lexer.GetToken();
         if(token.token_type != ERROR){  //is this cheating? yup 100%
-             parser->tokenList.push_back(token); //add what we just determined to the end of the token list
+            parser->tokenList.push_back(token); //add what we just determined to the end of the token list
         }
     }
 
