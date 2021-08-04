@@ -28,6 +28,7 @@ class VariableList{
     public:
     std::vector <Variable> list;
     int nextUnknown;
+    int checkedIndex; //for pointing to the variable returned by search
 
 
     VariableList();

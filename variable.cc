@@ -96,12 +96,15 @@ void VariableList::resolveUnknownVariables(int beingResolved, int resolvingTo, V
 Variable VariableList::searchList(string variableName){
     for(int i = list.size()-1; i >= 0; i--){
         if(list[i].name == variableName){
+            checkedIndex = i;
             return list[i];
         }
     }
     //if we're down here then there's no variable in the entire list that matches
     //so this is new I guess ughhhhhh
     addUnknownVariable(variableName, 0);
+    checkedIndex = list.size()-1;
+    return list[checkedIndex];
 }
 
 

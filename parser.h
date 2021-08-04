@@ -24,9 +24,11 @@ class Parser{
     void parseAssignment();
     VariableType parseExpression(Variable);
     VariableType parseExpression();
+    void parseUnary();
     void parseIf();
     void parseWhile();
     void parseSwitch();
+    void parseCaseList();
     void printTokenList();
 
     private:

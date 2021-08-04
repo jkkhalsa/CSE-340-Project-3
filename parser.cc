@@ -128,7 +128,7 @@ void Parser::parseVarDeclList(){
             currentType = REAL;
         }
         else if(token.lexeme == "bool"){
-            currentType == BOOL;
+            currentType = BOOL;
         }
     }
     parseVarList(currentType);
@@ -254,6 +254,9 @@ VariableType Parser::parseExpression(Variable leftHand){
     //these two are for unary and binary type checking
     VariableType rtype1;
     VariableType rtype2;
+    Variable rightVar;
+    Variable leftVar;
+    int lastChecked;
     //whee we're here
     //will either start with an id, num, realnum, binary operator, or unary operator
     //primary first because that just returns right back up after some cleanup
@@ -315,7 +318,7 @@ VariableType Parser::parseExpression(Variable leftHand){
         return expressionType;
     }
     else if(token.token_type == TR || token.token_type == FA){
-        expressionType == BOOL;
+        expressionType = BOOL;
         //this is a boolean value setting situation
         //make sure the variable is a bool
         if(leftHand.type == UNKNOWN){
@@ -331,21 +334,26 @@ VariableType Parser::parseExpression(Variable leftHand){
         return expressionType;
     }
 
-    //TODO: figure out how to parse binary and unary operators
-
     //ok if we're down here then things aren't this simple ughhhhhhh
     //so this is either a binary or unary operator expression
     //unary will always be NOT and should always have type bool
     if(token.token_type == NOT){
         //now made sense of this token
         index++;
+        expressionType = BOOL;
 
-        token = tokenList[index];
-        rtype1 = parseExpression();
-        if(rtype1 != BOOL && rtype1 != UNKNOWN){
-            cout << "TYPE MISMATCH " << token.line_no << " C3\n";
+        parseUnary();
+
+        //if we come back from parseUnary and there's a left-hand side, then that
+        //left hand side must be unknown or BOOL or else there's a c1 mismatch
+        if(leftHand.type != BOOL && leftHand.type != UNKNOWN){
+            cout << "TYPE MISMATCH " << token.line_no << " C1";
         }
-        //TODO: figure out how to resolve an unknown here to a bool
+        //if the left hand side is unknown, we can go ahead and change it
+        if(leftHand.type == UNKNOWN){
+            symbolTable.resolveUnknownVariables(leftHand.unknownNum, 0, BOOL);
+        }
+        return expressionType;
     }
     else if(token.token_type == PLUS || token.token_type == MINUS || token.token_type == MULT ||
     token.token_type == DIV || token.token_type == GREATER || token.token_type == LESS ||
@@ -362,16 +370,95 @@ VariableType Parser::parseExpression(Variable leftHand){
         //TODO: figure out how to resolve both sides of an unknown expression here to the same thing
 
     }
+    return expressionType;
 
 }
 
 
 //for expressions where there's no left hand side to resolve
 VariableType Parser::parseExpression(){
+    Variable rightHand;
+    VariableType expressionType;
 
+    VariableType rtype1;
+    VariableType rtype2;
+    Variable rightVar;
+    Variable leftVar;
+    int lastChecked;
+
+    //parsing primaries if there's no left side to resolve is very easy
+    //will start with id, num, realnum, tr/false if primary
+    token = tokenList[index];
+    if(token.token_type == ID || token.token_type == NUM || token.token_type == REALNUM || token.token_type == TR || token.token_type == FA){
+        //nest the if so we can increment index and return the type only once
+        if(token.token_type == ID){
+            //this is a variable
+            //search for the variable
+            rightHand = symbolTable.searchList(token.lexeme);
+            expressionType = rightHand.type;
+        }
+        else if(token.token_type == NUM){
+            expressionType = INT;
+        }
+        else if(token.token_type == REALNUM){
+            expressionType = REAL;
+        }
+        else if(token.token_type == TR || token.token_type == FA){
+            expressionType = BOOL;
+        }
+        //we've now made sense of this token
+        index++;
+        return expressionType;
+    }
+
+    //if we're down here then we have yet another expression whee
+    //will either be a unary or binary expression
+    if(token.token_type == NOT){
+        //now made sense of this token
+        index++;
+        expressionType = BOOL;
+        parseUnary();
+
+        //no left hand side to be resolved, can just go right back up
+        return expressionType;
+    }
+    else if(token.token_type == PLUS || token.token_type == MINUS || token.token_type == MULT ||
+    token.token_type == DIV || token.token_type == GREATER || token.token_type == LESS ||
+    token.token_type == GTEQ || token.token_type == LTEQ || token.token_type == EQUAL ||
+    token.token_type == NOTEQUAL){
+        //WHEW THAT'S A LONG IF
+        //anyway this is a binary operator expression
+        rtype1 = parseExpression();
+        rtype2 = parseExpression();
+    }
+
+
+    
 }
 
-//TODO: parse if, while, and switch statements
+void Parser::parseUnary(){
+    VariableType rType;
+    Variable rightVar;
+
+    token = tokenList[index];
+    rType = parseExpression();
+    if(rType != BOOL && rType != UNKNOWN){
+        cout << "TYPE MISMATCH " << token.line_no << " C3";
+        exit(1);
+    }
+    //if the type is unknown, then we must have returned directly from a primary variable
+    //so it's safe to look at the last searched and make it a boolean
+    if(rType == UNKNOWN){
+        //look for the variable last searched
+        rightVar = symbolTable.list[symbolTable.checkedIndex];
+        //make sure it's an unknown because I'm paranoid
+        if(rightVar.type == UNKNOWN){
+            //we can resolve all of this unknown number to a boolean
+            symbolTable.resolveUnknownVariables(rightVar.unknownNum, 0, BOOL);
+        }
+    }
+    return;
+}
 
 void Parser::parseIf(){
     VariableType ifType;
@@ -414,6 +501,24 @@ void Parser::parseSwitch(){
     else{
         expect(RPAREN);
         parseBody();
+    }
+    return;
+}
+
+void Parser::parseCaseList(){
+    token = tokenList[index];
+    if(token.lexeme != "CASE"){
+        SyntaxError();
+    }
+    else{ //this is parseCase() tbh
+        index++;
+        expect(NUM);
+        expect(COLON);
+        parseBody();
+    }
+    token = tokenList[index];
+    if(token.lexeme == "CASE"){
+        parseCaseList();
     }
     return;
 }
