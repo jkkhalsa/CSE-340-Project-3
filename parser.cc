@@ -196,18 +196,23 @@ void Parser::parseStmtList(){
     //ok good we've confirmed this is a proper statement list
     //check for assignment statement
     if(token.token_type == ID){
+        index++;
         parseAssignment();
     }
     else if(token.token_type == IF){
+        index++;
         parseIf();
     }
     else if(token.token_type == WHILE){
+        index++;
         parseWhile();
     }
     else if(token.token_type == SWITCH){
+        index++;
         parseSwitch();
     }
     //statement list will always have either another statement list after it or the end of the body
+    //might be a this token instead of a peek
     if(Peek(1).token_type != RBRACE){
         parseStmtList();
     }
@@ -367,6 +372,51 @@ VariableType Parser::parseExpression(){
 }
 
 //TODO: parse if, while, and switch statements
+
+void Parser::parseIf(){
+    VariableType ifType;
+    expect(LPAREN);
+    ifType = parseExpression();
+    if(ifType != BOOL){
+        cout << "TYPE MISMATCH " << token.line_no << " C4\n";
+        exit(1);
+    }
+    else{
+        expect(RPAREN);
+        parseBody();
+    }
+    return;
+}
+
+void Parser::parseWhile(){
+    VariableType whileType;
+    expect(LPAREN);
+    whileType = parseExpression();
+    if(whileType != BOOL){
+        cout << "TYPE MISMATCH " << token.line_no << " C4\n";
+        exit(1);
+    }
+    else{
+        expect(RPAREN);
+        parseBody();
+    }
+    return;
+}
+
+void Parser::parseSwitch(){
+    VariableType switchType;
+    expect(LPAREN);
+    switchType = parseExpression();
+    if(switchType != INT){
+        cout << "TYPE MISMATCH " << token.line_no << " C5\n";
+        exit(1);
+    }
+    else{
+        expect(RPAREN);
+        parseBody();
+    }
+    return;
+}
 
 
 int main()
