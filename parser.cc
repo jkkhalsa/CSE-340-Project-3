@@ -101,9 +101,8 @@ void Parser::parseProgram(){
 void Parser::parseGlobalVars(){
     //variables are defined in here so we'll be working closely with the var class
     //we have the variable type now we can make the symbol table of variables here
-    
-
-
+    parseVarDeclList();
+    return;
 }
 
 void Parser::parseVarDeclList(){
@@ -228,17 +227,106 @@ void Parser::parseAssignment(){
     expect(EQUAL);
 
     //now parse the expression on the right hand side
-    rightHandType = parseExpression();
+    //passing what's on the left so we can do unknown cleanup in expression
+    rightHandType = parseExpression(leftHand);
 
     //check and make sure we don't have a type error C1
     if(rightHandType != leftHand.type){
         cout << "TYPE MISMATCH " << token.line_no << " C1\n";
         exit(1);
     }
-    //TODO: figure out unknown cleanup here
     
     expect(SEMICOLON);
     return;
+}
+
+VariableType Parser::parseExpression(Variable leftHand){
+    Variable rightHand;
+    VariableType expressionType;
+    //whee we're here
+    //will either start with an id, num, realnum, binary operator, or unary operator
+    //primary first because that just returns right back up after some cleanup
+    token = tokenList[index];
+    if(token.token_type == ID){
+        //this is a variable = variable situation
+        //search for the variable
+        rightHand = symbolTable.searchList(token.lexeme);
+        expressionType = rightHand.type;
+
+        //check for a c1 error just in case
+        if(rightHand.type != leftHand.type && rightHand.type != UNKNOWN && leftHand.type != UNKNOWN){
+            cout << "TYPE MISMATCH " << token.line_no << " C1\n";
+        }
+
+        //now resolve our unknowns
+        if(rightHand.type == UNKNOWN){
+            symbolTable.resolveUnknownVariables(leftHand.unknownNum, rightHand.unknownNum, leftHand.type);
+        }
+        else if(leftHand.type == UNKNOWN){
+            symbolTable.resolveUnknownVariables(rightHand.unknownNum, leftHand.unknownNum, rightHand.type);
+        }
+        //we've made sense of this token
+        index++;
+        return expressionType;
+    }
+    else if(token.token_type == NUM){
+        expressionType = INT;
+        //this is a variable = number situation
+        //make sure the variable is an int
+        if(leftHand.type == UNKNOWN){
+            leftHand.type = INT;
+            symbolTable.resolveUnknownVariables(leftHand.unknownNum, 0, INT);
+            //leftHand.unknownNum = 0;
+        }
+        if(leftHand.type != INT){
+            cout << "TYPE MISMATCH " << token.line_no << " C1\n";
+            exit(1);
+        }
+        //we've made sense of this token
+        index++;
+        return expressionType;
+    }
+    else if(token.token_type == REALNUM){
+        expressionType = REAL;
+        //this is a variable = decimal situation
+        //make sure the variable is a real
+        if(leftHand.type == UNKNOWN){
+            leftHand.type = REAL;
+            symbolTable.resolveUnknownVariables(leftHand.unknownNum, 0, REAL);
+            //leftHand.unknownNum = 0;
+        }
+        if(leftHand.type != REAL){
+            cout << "TYPE MISMATCH " << token.line_no << " C1\n";
+            exit(1);
+        }
+        //we've made sense of this token
+        index++;
+        return expressionType;
+    }
+    else if(token.token_type == TR || token.token_type == FA){
+        expressionType == BOOL;
+        //this is a boolean value setting situation
+        //make sure the variable is a bool
+        if(leftHand.type == UNKNOWN){
+            leftHand.type = BOOL;
+            symbolTable.resolveUnknownVariables(leftHand.unknownNum, 0, BOOL);
+            //leftHand.unknownNum = 0;
+        }
+        if(leftHand.type != BOOL){
+            cout << "TYPE MISMATCH " << token.line_no << " C1\n";
+        }
+        //we've made sense of this token
+        index++;
+        return expressionType;
+    }
+
+    //ok if we're down here then things aren't this simple ughhhhhhh
+    //so this is either a binary or unary operator expression
+    //unary will always be NOT and should always have type bool
+    if(token.token_type == NOT){
+        
+    }
+
 }
 
 
