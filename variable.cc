@@ -1,5 +1,6 @@
 #include <iostream>
 #include "variable.h"
+#include <algorithm>
 
 using namespace std;
 
@@ -24,10 +25,9 @@ string Variable::printVariable(){
                 temp += "bool";
         }
         temp += "#\n";
-        return temp;
     }
     else{
-
+        temp = name;
     }
     return temp;
 }
@@ -110,6 +110,34 @@ Variable VariableList::searchList(string variableName){
     checkedIndex = list.size()-1;
     storeUnknown = list[checkedIndex].unknownNum;
     return list[checkedIndex];
+}
+
+void VariableList::printVariableList(){
+    string unknownString;
+    int unknownPrinting;
+    for(auto elem : list){
+        if(elem.type != UNKNOWN){
+            cout << elem.printVariable() << "\n";
+        }
+        else{
+            unknownPrinting = elem.unknownNum;
+            if(count(printedUnknowns.begin(), printedUnknowns.end(), unknownPrinting) == 0){
+                //if the unknown we hit upon isn't in the list of what's already been printed
+                unknownString = elem.printVariable();
+                for(auto elem : list){
+                    if(elem.unknownNum == unknownPrinting){
+                        unknownString += ", ";
+                        unknownString += elem.name;
+                    }
+                }
+                unknownString += ": ? #\n";
+                cout << unknownString;
+            }
+            //add this unknown to the list of ones that've been printed
+            printedUnknowns.push_back(unknownPrinting);
+        }
+    }
+    return;
 }
 
 

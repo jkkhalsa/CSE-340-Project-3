@@ -651,7 +651,7 @@ int main()
     parser->printTokenList();
 
     //parse that list into actual output
-    //parser->parseProgram();
-    //cout << parser->output;
+    parser->parseProgram();
+    parser->symbolTable.printVariableList();
     return 1;
 }
