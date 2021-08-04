@@ -252,11 +252,10 @@ VariableType Parser::parseExpression(Variable leftHand){
     VariableType expressionType;
 
     //these two are for unary and binary type checking
-    VariableType rtype1;
-    VariableType rtype2;
     Variable rightVar;
     Variable leftVar;
-    int lastChecked;
+    int currentUnknown;
+
     //whee we're here
     //will either start with an id, num, realnum, binary operator, or unary operator
     //primary first because that just returns right back up after some cleanup
@@ -361,17 +360,31 @@ VariableType Parser::parseExpression(Variable leftHand){
     token.token_type == NOTEQUAL){
         //WHEW THAT'S A LONG IF
         //anyway this is a binary operator expression
-        rtype1 = parseExpression();
-        rtype2 = parseExpression();
-        //if the two expression types aren't the same, this is a c2 fuckup
-        if(rtype1 != rtype2 && rtype1 != UNKNOWN && rtype2 != UNKNOWN){
-            cout << "TYPE MISMATCH " << token.line_no << " C2\n";
+        expressionType = parseBinary();
+        currentUnknown = symbolTable.storeUnknown; //will either be 0 or a number
+        //now we need to resolve the left hand and right hand sides
+        if(leftHand.type == UNKNOWN){
+            if(expressionType == UNKNOWN){
+                //if both are unknown and the unknown type isn't the same
+                if(leftHand.unknownNum != currentUnknown){
+                    //resolve in favor of what's being assigned to
+                    symbolTable.resolveUnknownVariables(currentUnknown, leftHand.unknownNum, UNKNOWN);
+                    symbolTable.storeUnknown = 0; //reset this because it's in an assignment statement
+                }
+            }
+            //if the left is unknown but the expression type is known
+            symbolTable.resolveUnknownVariables(leftHand.unknownNum, 0, expressionType);
+            symbolTable.storeUnknown = 0;
         }
-        //TODO: figure out how to resolve both sides of an unknown expression here to the same thing
-
+        //if the right is unknown but the left is known
+        else if(expressionType == UNKNOWN && leftHand.type != UNKNOWN){
+            symbolTable.resolveUnknownVariables(currentUnknown, 0, leftHand.type);
+            expressionType = leftHand.type;
+        }
+        return expressionType;
     }
-    return expressionType;
-
+    //if we're down here then we didn't start with anything that can be considered an expression
+    SyntaxError();
 }
 
 
@@ -380,11 +393,8 @@ VariableType Parser::parseExpression(){
     Variable rightHand;
     VariableType expressionType;
 
-    VariableType rtype1;
-    VariableType rtype2;
     Variable rightVar;
     Variable leftVar;
-    int lastChecked;
 
     //parsing primaries if there's no left side to resolve is very easy
     //will start with id, num, realnum, tr/false if primary
@@ -428,12 +438,106 @@ VariableType Parser::parseExpression(){
     token.token_type == NOTEQUAL){
         //WHEW THAT'S A LONG IF
         //anyway this is a binary operator expression
-        rtype1 = parseExpression();
-        rtype2 = parseExpression();
+        expressionType = parseBinary();
+        return expressionType;
+    }
+    //if we're down here then we didn't start with anything that can be considered an expression
+    SyntaxError();
+    exit(1);
+}
+
+VariableType Parser::parseBinary(){
+    VariableType expressionType;
+
+    VariableType leftType;
+    VariableType rightType;
+
+    int leftUnknown;
+    int rightUnknown;
+
+
+    token = tokenList[index];
+    //check what type this should be
+    if(token.token_type == PLUS || token.token_type == MINUS || token.token_type == MULT ||
+        token.token_type == DIV){
+        //now made sense of this operator
+        index++;
+        //the type is going to be the same as both expression types
+        leftType = parseExpression();
+        leftUnknown = symbolTable.storeUnknown;
+        
+        rightType = parseExpression();
+        rightUnknown = symbolTable.storeUnknown;
+
+        //resolve unknown variables
+        if(leftType == UNKNOWN){
+            if(rightType == UNKNOWN){
+                //if both are unknown and the unknown type isn't the same
+                if(leftUnknown != rightUnknown){
+                    //resolve in favor of the left
+                    symbolTable.resolveUnknownVariables(rightUnknown, leftUnknown, UNKNOWN);
+                    //store the storeUnknown to pass up because this is going to return an unknown
+                    symbolTable.storeUnknown = leftUnknown;
+                }
+            }
+            //if the left is unknown but the right is known
+            symbolTable.resolveUnknownVariables(leftUnknown, 0, rightType);
+            leftType = rightType;
+        }
+        //if the right is unknown but the left is known
+        else if(rightType == UNKNOWN && leftType != UNKNOWN){
+            symbolTable.resolveUnknownVariables(rightUnknown, 0, leftType);
+            rightType = leftType;
+        }
+        expressionType = leftType; //we've resolved the variables to the same so just pick one to return
+        
+    }
+    else{
+        //now made sense of this operator
+        index++;
+        expressionType = BOOL;
+        //now parse both the expressions and make sure they're the same type
+        //we can't do this outside the if/else because the above needs to get its expressionType
+        //after we resolve the types
+        leftType = parseExpression();
+        leftUnknown = symbolTable.storeUnknown;
+        
+        rightType = parseExpression();
+        rightUnknown = symbolTable.storeUnknown;
+
+        //resolve unknown variables
+        if(leftType == UNKNOWN){
+            if(rightType == UNKNOWN){
+                //if both are unknown and the unknown type isn't the same
+                if(leftUnknown != rightUnknown){
+                    //resolve in favor of the left
+                    symbolTable.resolveUnknownVariables(rightUnknown, leftUnknown, UNKNOWN);
+                    //remove the storeUnknown because this will return BOOL
+                    symbolTable.storeUnknown = 0;
+                }
+            }
+            //if the left is unknown but the right is known
+            symbolTable.resolveUnknownVariables(leftUnknown, 0, rightType);
+            leftType = rightType;
+        }
+        //if the right is unknown but the left is known
+        else if(rightType == UNKNOWN && leftType != UNKNOWN){
+            symbolTable.resolveUnknownVariables(rightUnknown, 0, leftType);
+            rightType = leftType;
+        }
+
+
+
     }
 
-
-    
+    //now that the unknown variables are resolved, we can check if they're the same type
+    if(leftType != rightType){
+        cout << "TYPE MISMATCH " << token.line_no << " C2\n";
+        exit(1);
+    }
+    //if we're here then we're just fine to go ahead and return
+    //the unknown type if this is unknown will be still stored in symbolTable.storeUnknown
+    return expressionType;
 }
 
 void Parser::parseUnary(){

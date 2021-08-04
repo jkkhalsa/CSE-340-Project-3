@@ -26,7 +26,10 @@ string Variable::printVariable(){
         temp += "#\n";
         return temp;
     }
-    
+    else{
+
+    }
+    return temp;
 }
 
 
@@ -97,6 +100,7 @@ Variable VariableList::searchList(string variableName){
     for(int i = list.size()-1; i >= 0; i--){
         if(list[i].name == variableName){
             checkedIndex = i;
+            storeUnknown = list[checkedIndex].unknownNum;
             return list[i];
         }
     }
@@ -104,6 +108,7 @@ Variable VariableList::searchList(string variableName){
     //so this is new I guess ughhhhhh
     addUnknownVariable(variableName, 0);
     checkedIndex = list.size()-1;
+    storeUnknown = list[checkedIndex].unknownNum;
     return list[checkedIndex];
 }
 

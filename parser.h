@@ -25,6 +25,8 @@ class Parser{
     VariableType parseExpression(Variable);
     VariableType parseExpression();
     void parseUnary();
+    VariableType parseBinary();
+    void parseBoolBinary();
     void parseIf();
     void parseWhile();
     void parseSwitch();
