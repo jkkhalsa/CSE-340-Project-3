@@ -22,6 +22,7 @@ class Parser{
     void parseBody();
     void parseStmtList();
     void parseAssignment();
+    VariableType parseExpression(Variable);
     VariableType parseExpression();
     void parseIf();
     void parseWhile();

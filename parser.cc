@@ -240,9 +240,15 @@ void Parser::parseAssignment(){
     return;
 }
 
+
+//for expressions where there's a left hand side to be resolved
 VariableType Parser::parseExpression(Variable leftHand){
     Variable rightHand;
     VariableType expressionType;
+
+    //these two are for unary and binary type checking
+    VariableType rtype1;
+    VariableType rtype2;
     //whee we're here
     //will either start with an id, num, realnum, binary operator, or unary operator
     //primary first because that just returns right back up after some cleanup
@@ -320,14 +326,47 @@ VariableType Parser::parseExpression(Variable leftHand){
         return expressionType;
     }
 
+    //TODO: figure out how to parse binary and unary operators
+
     //ok if we're down here then things aren't this simple ughhhhhhh
     //so this is either a binary or unary operator expression
     //unary will always be NOT and should always have type bool
     if(token.token_type == NOT){
-        
+        //now made sense of this token
+        index++;
+
+        token = tokenList[index];
+        rtype1 = parseExpression();
+        if(rtype1 != BOOL && rtype1 != UNKNOWN){
+            cout << "TYPE MISMATCH " << token.line_no << " C3\n";
+        }
+        //TODO: figure out how to resolve an unknown here to a bool
+    }
+    else if(token.token_type == PLUS || token.token_type == MINUS || token.token_type == MULT ||
+    token.token_type == DIV || token.token_type == GREATER || token.token_type == LESS ||
+    token.token_type == GTEQ || token.token_type == LTEQ || token.token_type == EQUAL ||
+    token.token_type == NOTEQUAL){
+        //WHEW THAT'S A LONG IF
+        //anyway this is a binary operator expression
+        rtype1 = parseExpression();
+        rtype2 = parseExpression();
+        //if the two expression types aren't the same, this is a c2 fuckup
+        if(rtype1 != rtype2 && rtype1 != UNKNOWN && rtype2 != UNKNOWN){
+            cout << "TYPE MISMATCH " << token.line_no << " C2\n";
+        }
+        //TODO: figure out how to resolve both sides of an unknown expression here to the same thing
+
     }
 
 }
+
+
+//for expressions where there's no left hand side to resolve
+VariableType Parser::parseExpression(){
+
+}
+
+//TODO: parse if, while, and switch statements
 
 
 int main()
