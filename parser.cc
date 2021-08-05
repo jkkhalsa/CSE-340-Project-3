@@ -240,6 +240,8 @@ void Parser::parseAssignment(){
     //now parse the expression on the right hand side
     //passing what's on the left so we can do unknown cleanup in expression
     rightHandType = parseExpression(leftHand);
+    //check to see if leftHand changed type
+    leftHand = symbolTable.searchList(leftHand.name);
 
     //check and make sure we don't have a type error C1
     if(rightHandType != leftHand.type){
@@ -401,7 +403,6 @@ VariableType Parser::parseExpression(Variable leftHand){
 
 //for expressions where there's no left hand side to resolve
 VariableType Parser::parseExpression(){
-    //cout << "DEBUG: in parseExpression()\n";
     Variable rightHand;
     VariableType expressionType;
 
