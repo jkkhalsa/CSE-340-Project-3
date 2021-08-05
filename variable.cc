@@ -37,7 +37,7 @@ string Variable::printVariable(){
 
 
 VariableList::VariableList(){
-
+    nextUnknown = 1;
 }
 
 //name, type

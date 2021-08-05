@@ -528,7 +528,7 @@ VariableType Parser::parseBinary(){
                     //resolve in favor of the left
                     symbolTable.resolveUnknownVariables(rightUnknown, leftUnknown, UNKNOWN);
                     //remove the storeUnknown because this will return BOOL
-                    symbolTable.storeUnknown = 0;
+                    //symbolTable.storeUnknown = 0;
                 }
             }
             else{
@@ -603,10 +603,11 @@ void Parser::parseWhile(){
     VariableType whileType;
     expect(LPAREN);
     whileType = parseExpression();
-    if(whileType != BOOL){
+    if(whileType != BOOL && whileType != UNKNOWN){
         cout << "TYPE MISMATCH " << token.line_no << " C4\n";
         exit(1);
     }
+    //TODO: resolve while type to a bool
     else{
         expect(RPAREN);
         parseBody();
@@ -619,16 +620,18 @@ void Parser::parseSwitch(){
     VariableType switchType;
     expect(LPAREN);
     switchType = parseExpression();
-    if(switchType != INT){
+    if(switchType != INT && switchType != UNKNOWN){
         cout << "TYPE MISMATCH " << token.line_no << " C5\n";
         exit(1);
     }
-    else{
-        expect(RPAREN);
-        expect(LBRACE);
-        parseCaseList();
-        expect(RBRACE);
+    //can resolve what's in the switch statement to an INT
+    else if(switchType == UNKNOWN){
+        symbolTable.resolveUnknownVariables(symbolTable.storeUnknown, 0, INT);
     }
+    expect(RPAREN);
+    expect(LBRACE);
+    parseCaseList();
+    expect(RBRACE);
     return;
 }
 
