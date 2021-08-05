@@ -41,6 +41,8 @@ Token Parser::Peek(int howFar)
 void Parser::SyntaxError()
 {
     cout << "Syntax Error\n";
+    cout << "Error on token ";
+    token.Print();
     exit(1);
 }
 
@@ -65,7 +67,7 @@ Token Parser::expect(TokenType expected_type)
 
 
 void Parser::parseProgram(){
-    cout << "DEBUG: in parseProgram()\n";
+    //cout << "DEBUG: in parseProgram()\n";
     //will either start with global variables or the body
     //if global variables, we have a variable declaration - ID and comma or :
     //if body, it'll start with a lbrace
@@ -97,7 +99,7 @@ void Parser::parseProgram(){
 }
 
 void Parser::parseGlobalVars(){
-    cout << "DEBUG: in parseGlobalVars()\n";
+    //cout << "DEBUG: in parseGlobalVars()\n";
     //variables are defined in here so we'll be working closely with the var class
     //we have the variable type now we can make the symbol table of variables here
     parseVarDeclList();
@@ -105,7 +107,7 @@ void Parser::parseGlobalVars(){
 }
 
 void Parser::parseVarDeclList(){
-    cout << "DEBUG: in parseVarDeclarationList()\n";
+    //cout << "DEBUG: in parseVarDeclarationList()\n";
     //can either be a single declaration or a list of them
     //will always start with a single declaration, or rather an ID
     //first we need to see what type this line of variables will be
@@ -115,7 +117,6 @@ void Parser::parseVarDeclList(){
         i++;
     }
     //we have the colon, one more will be the variable type
-    //TODO: make sure this works
     token = Peek(i+1);
     if(token.token_type != ID){
         SyntaxError();
@@ -151,7 +152,7 @@ void Parser::parseVarDeclList(){
 }
 
 void Parser::parseVarList(VariableType currentType){
-    cout << "DEBUG: in parseVarList()\n";
+    //cout << "DEBUG: in parseVarList()\n";
     //a var list goes ID-COMMA-ID-COMMA until it hits a colon
     token = tokenList[index];
     if(tokenList[index].token_type != ID){
@@ -179,7 +180,7 @@ void Parser::parseVarList(VariableType currentType){
 }
 
 void Parser::parseBody(){
-    cout << "DEBUG: in parseBody()\n";
+    //cout << "DEBUG: in parseBody()\n";
     //we should start with a lbrace
     expect(LBRACE);
     //good now that's over with
@@ -190,7 +191,7 @@ void Parser::parseBody(){
 }
 
 void Parser::parseStmtList(){
-    cout << "DEBUG: in parseStatementList()\n";
+    //cout << "DEBUG: in parseStatementList()\n";
     //we can come into a statement list completely fucked up, so make sure this is one
     //can start with an ID, an IF, a While, or a Switch
     token = tokenList[index];
@@ -224,7 +225,7 @@ void Parser::parseStmtList(){
 }
 
 void Parser::parseAssignment(){
-    cout << "DEBUG: in parseAssignment()\n";
+   // cout << "DEBUG: in parseAssignment()\n";
     Variable leftHand;
     VariableType rightHandType;
     token = tokenList[index];
@@ -254,7 +255,7 @@ void Parser::parseAssignment(){
 
 //for expressions where there's a left hand side to be resolved
 VariableType Parser::parseExpression(Variable leftHand){
-    cout << "DEBUG: in parseExpression(variable) from assignment statement\n";
+    //cout << "DEBUG: in parseExpression(variable) from assignment statement\n";
     Variable rightHand;
     VariableType expressionType;
 
@@ -398,7 +399,7 @@ VariableType Parser::parseExpression(Variable leftHand){
 
 //for expressions where there's no left hand side to resolve
 VariableType Parser::parseExpression(){
-    cout << "DEBUG: in parseExpression()\n";
+    //cout << "DEBUG: in parseExpression()\n";
     Variable rightHand;
     VariableType expressionType;
 
@@ -456,7 +457,7 @@ VariableType Parser::parseExpression(){
 }
 
 VariableType Parser::parseBinary(){
-    cout << "DEBUG: in parseBinary()\n";
+    //cout << "DEBUG: in parseBinary()\n";
     VariableType expressionType;
 
     VariableType leftType;
@@ -551,7 +552,7 @@ VariableType Parser::parseBinary(){
 }
 
 void Parser::parseUnary(){
-    cout << "DEBUG: in parseUnary()\n";
+    //cout << "DEBUG: in parseUnary()\n";
     VariableType rType;
     Variable rightVar;
 
@@ -592,7 +593,7 @@ void Parser::parseIf(){
 }
 
 void Parser::parseWhile(){
-    cout << "DEBUG: in parseWhile()\n";
+    //cout << "DEBUG: in parseWhile()\n";
     VariableType whileType;
     expect(LPAREN);
     whileType = parseExpression();
@@ -618,25 +619,25 @@ void Parser::parseSwitch(){
     }
     else{
         expect(RPAREN);
-        parseBody();
+        expect(LBRACE);
+        parseCaseList();
+        expect(RBRACE);
     }
     return;
 }
 
 void Parser::parseCaseList(){
-    cout << "DEBUG: in parseCaseList()\n";
+    //cout << "DEBUG: in parseCaseList()\n";
     token = tokenList[index];
-    if(token.lexeme != "CASE"){
-        SyntaxError();
-    }
-    else{ //this is parseCase() tbh
-        index++;
-        expect(NUM);
-        expect(COLON);
-        parseBody();
-    }
+
+    //this is parseCase() tbh
+    expect(CASE);
+    expect(NUM);
+    expect(COLON);
+    parseBody();
+
     token = tokenList[index];
-    if(token.lexeme == "CASE"){
+    if(token.token_type == CASE){
         parseCaseList();
     }
     return;
@@ -663,7 +664,7 @@ int main()
         }
     }
 
-    parser->printTokenList();
+    //parser->printTokenList();
 
     //parse that list into actual output
     parser->parseProgram();
