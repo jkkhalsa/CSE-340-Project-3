@@ -274,7 +274,29 @@ VariableType Parser::parseExpression(Variable leftHand){
         //this is a variable = variable situation
         //search for the variable
         rightHand = symbolTable.searchList(token.lexeme);
-        expressionType = rightHand.type;
+
+        //resolve it if one is an unknown
+        if(leftHand.type == UNKNOWN){
+            if(rightHand.type == UNKNOWN){
+                //both are unknown and the unknown type isn't the same
+                if(leftHand.unknownNum != rightHand.unknownNum){
+                    //resolve in favor of the left
+                    symbolTable.resolveUnknownVariables(rightHand.unknownNum, leftHand.unknownNum, UNKNOWN);
+                    //store this as the last unknown to have been made
+                    symbolTable.storeUnknown = leftHand.unknownNum;
+                }
+            }
+            else{
+                //if the left is unknown but the right is known
+                symbolTable.resolveUnknownVariables(leftHand.unknownNum, 0, rightHand.type);
+                leftHand = symbolTable.searchList(leftHand.name);
+            }
+        }
+        //if the right is unknown but the left is known
+        else if(rightHand.type == UNKNOWN && leftHand.type != UNKNOWN){
+            symbolTable.resolveUnknownVariables(rightHand.unknownNum, 0, leftHand.type);
+            rightHand = symbolTable.searchList(rightHand.name);
+        }
 
         //check for a c1 error just in case
         if(rightHand.type != leftHand.type && rightHand.type != UNKNOWN && leftHand.type != UNKNOWN){
@@ -289,6 +311,7 @@ VariableType Parser::parseExpression(Variable leftHand){
             symbolTable.resolveUnknownVariables(rightHand.unknownNum, leftHand.unknownNum, rightHand.type);
         }
         //we've made sense of this token
+        expressionType = rightHand.type;
         index++;
         return expressionType;;
     }
@@ -373,6 +396,8 @@ VariableType Parser::parseExpression(Variable leftHand){
         expressionType = parseBinary();
         currentUnknown = symbolTable.storeUnknown; //will either be 0 or a number
         //now we need to resolve the left hand and right hand sides
+        //make sure left hand hasn't changed
+        leftHand = symbolTable.searchList(leftHand.name);
         if(leftHand.type == UNKNOWN){
             if(expressionType == UNKNOWN){
                 //if both are unknown and the unknown type isn't the same
@@ -588,14 +613,15 @@ void Parser::parseIf(){
     VariableType ifType;
     expect(LPAREN);
     ifType = parseExpression();
-    if(ifType != BOOL){
+    if(ifType != BOOL && ifType != UNKNOWN){
         cout << "TYPE MISMATCH " << token.line_no << " C4\n";
         exit(1);
     }
-    else{
-        expect(RPAREN);
-        parseBody();
+    else if(ifType == UNKNOWN){
+        symbolTable.resolveUnknownVariables(symbolTable.storeUnknown, 0, BOOL);
     }
+    expect(RPAREN);
+    parseBody();
     return;
 }
 
@@ -609,10 +635,12 @@ void Parser::parseWhile(){
         exit(1);
     }
     //TODO: resolve while type to a bool
-    else{
-        expect(RPAREN);
-        parseBody();
+    else if(whileType == UNKNOWN){
+        symbolTable.resolveUnknownVariables(symbolTable.storeUnknown, 0, BOOL);
     }
+    expect(RPAREN);
+    parseBody();
+    
     return;
 }
 
