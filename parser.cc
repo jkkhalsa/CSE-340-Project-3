@@ -86,7 +86,6 @@ void Parser::parseProgram(){
     if(token.token_type == LBRACE){
         parseBody();
     }
-    cout << "DEBUG: in parseProgram, checking for EOF\n";
     //if we're here, then we've got an end of file, hopefully
     token = tokenList[index];
     if(token.token_type == END_OF_FILE){
@@ -187,7 +186,6 @@ void Parser::parseBody(){
     //now statements wheeeeee
     parseStmtList();
     expect(RBRACE);
-    cout << "DEBUG: passed expecting rbrace in body\n";
     return;
 }
 
@@ -219,8 +217,6 @@ void Parser::parseStmtList(){
     //statement list will always have either another statement list after it or the end of the body
     //might be a this token instead of a peek
     token = tokenList[index];
-    cout << "DEBUG: right after getting the next token, token is ";
-    token.Print();
     if(token.token_type != RBRACE){
         parseStmtList();
     }
@@ -232,13 +228,10 @@ void Parser::parseAssignment(){
     Variable leftHand;
     VariableType rightHandType;
     token = tokenList[index];
-    cout << "DEBUG: coming into assignment, the token is ";
-    token.Print();
     //an assignment statement will always be ID equals EXPRESSION ;
     //we already checked if this is an ID before calling this
     //get the left side of the expression into the variable list
     leftHand = symbolTable.searchList(token.lexeme);
-    cout << "DEBUG: leftHand is " << leftHand.printVariable();
     index++;
 
     expect(EQUAL);
@@ -274,10 +267,7 @@ VariableType Parser::parseExpression(Variable leftHand){
     //will either start with an id, num, realnum, binary operator, or unary operator
     //primary first because that just returns right back up after some cleanup
     token = tokenList[index];
-    cout << "DEBUG: token being parsed is ";
-    token.Print();
     if(token.token_type == ID){
-        cout << "DEBUG: found an ID in " << token.lexeme << "\n";
         //this is a variable = variable situation
         //search for the variable
         rightHand = symbolTable.searchList(token.lexeme);
@@ -297,7 +287,6 @@ VariableType Parser::parseExpression(Variable leftHand){
         }
         //we've made sense of this token
         index++;
-        cout << "DEBUG: returning expression type " << expressionType << "\n";
         return expressionType;;
     }
     else if(token.token_type == NUM){

@@ -19,12 +19,15 @@ string Variable::printVariable(){
         switch(type){
             case INT:
                 temp += "int";
+                break;
             case REAL:
                 temp += "real";
+                break;
             case BOOL:
                 temp += "bool";
+                break;
         }
-        temp += "#\n";
+        temp += " #";
     }
     else{
         temp = name;
@@ -115,6 +118,7 @@ Variable VariableList::searchList(string variableName){
 void VariableList::printVariableList(){
     string unknownString;
     int unknownPrinting;
+    bool skipFirst = false;
     for(auto elem : list){
         if(elem.type != UNKNOWN){
             cout << elem.printVariable() << "\n";
@@ -124,10 +128,15 @@ void VariableList::printVariableList(){
             if(count(printedUnknowns.begin(), printedUnknowns.end(), unknownPrinting) == 0){
                 //if the unknown we hit upon isn't in the list of what's already been printed
                 unknownString = elem.printVariable();
+                skipFirst = false;
                 for(auto elem : list){
-                    if(elem.unknownNum == unknownPrinting){
+                    if(elem.unknownNum == unknownPrinting && skipFirst){
                         unknownString += ", ";
                         unknownString += elem.name;
+                    }
+                    //need this one to make sure the first one you hit in the list doesn't get printed twice
+                    if(elem.unknownNum == unknownPrinting && !skipFirst){
+                        skipFirst = true;
                     }
                 }
                 unknownString += ": ? #\n";
