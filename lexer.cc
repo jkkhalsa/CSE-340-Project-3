@@ -72,7 +72,7 @@ bool LexicalAnalyzer::SkipSpace()
     return space_encountered;
 }
 
-bool LexicalAnalyzer::SkipComments()
+/*bool LexicalAnalyzer::SkipComments()
 {
     bool comments = false;
     char c;
@@ -103,7 +103,7 @@ bool LexicalAnalyzer::SkipComments()
         return comments;
     }
     return comments;
-}
+}*/
 
 bool LexicalAnalyzer::IsKeyword(string s)
 {
@@ -264,8 +264,6 @@ Token LexicalAnalyzer::GetToken()
         return tmp;
     }
 
-    SkipSpace();
-    SkipComments();
     SkipSpace();
     tmp.lexeme = "";
     tmp.line_no = line_no;
