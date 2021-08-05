@@ -39,6 +39,7 @@ class VariableList{
     Variable searchList(std::string);
     
     void printVariableList();
+    void debugPrintVariableList();
 
     private:
     std::vector<int> printedUnknowns;

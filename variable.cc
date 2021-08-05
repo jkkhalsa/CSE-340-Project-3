@@ -50,6 +50,8 @@ void VariableList::addKnownVariable(string n, VariableType t){
 
     //add it to the symbol table
     list.push_back(variable);
+    cout << "DEBUG: after adding " << variable.printVariable() << " the list is now ";
+    printVariableList();
     return;
 }
 
@@ -67,6 +69,8 @@ void VariableList::addUnknownVariable(string n, int u){
         variable.unknownNum = nextUnknown;
         nextUnknown++;
     }
+    cout << "DEBUG: after adding " << variable.printVariable() << " the list is now ";
+    printVariableList();
     list.push_back(variable);
     return;
 }
@@ -82,6 +86,7 @@ void VariableList::resolveUnknownVariables(int beingResolved, int resolvingTo, V
         for(int i = list.size()-1; i>=0; i--){
             if(list[i].type == UNKNOWN && list[i].unknownNum == beingResolved){
                 list[i].unknownNum = resolvingTo;
+                cout << "DEBUG: resolving variable " << list[i].name << " to type " << list[i].type << " and unknown " << list[i].unknownNum << "\n";
             }
         }
     }
@@ -91,6 +96,7 @@ void VariableList::resolveUnknownVariables(int beingResolved, int resolvingTo, V
             if(list[i].type == UNKNOWN && list[i].unknownNum == beingResolved){
                 list[i].unknownNum = 0;
                 list[i].type = newType;
+                cout << "DEBUG: resolving variable " << list[i].name << " to type " << list[i].type << " and unknown " << list[i].unknownNum << "\n";
             }
         }
     }
@@ -125,7 +131,10 @@ void VariableList::printVariableList(){
         }
         else{
             unknownPrinting = elem.unknownNum;
+            //cout << "DEBUG: hit upon an unknown that might be in the already printed table\n";
+            //cout << "DEBUG: already printed table size is " << printedUnknowns.size() << "\n";
             if(count(printedUnknowns.begin(), printedUnknowns.end(), unknownPrinting) == 0){
+                //cout << "DEBUG: hit upon an unknown we need to print\n";
                 //if the unknown we hit upon isn't in the list of what's already been printed
                 unknownString = elem.printVariable();
                 skipFirst = false;
@@ -149,30 +158,8 @@ void VariableList::printVariableList(){
     return;
 }
 
-
-
-/*
-//Search through our known list to see if a variable type is already known
-//if not, we return UNKNOWN and can search the unknown list
-Variable VariableList::searchKnownList(string currentScope, string variableName){
-    for(int i = list.size()-1; i >= 0; i--){
-        if(list[i].name == variableName){
-            if(list[i].scope == currentScope || list[i].isPublic || list[i].scope == ":"){
-                return list[i];
-            }
-        }
+void VariableList :: debugPrintVariableList(){
+    for(auto elem : list){
+        cout << "<" << elem.name << ", type " << elem.type << ", unknown " << elem.unknownNum << ">\n";
     }
-    //if we're down here then there's no variable in the entire list that matches
-    //so just make one ez
-    Variable variable;
-    variable.scope = "?";
-    variable.name = variableName;
-    return variable;
 }
-
-void VariableList::printVariableList(){
-    for(auto elem : knownList){
-        cout << elem.printVariable() << "\n";
-    }
-    return;
-}*/

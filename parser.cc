@@ -225,7 +225,7 @@ void Parser::parseStmtList(){
 }
 
 void Parser::parseAssignment(){
-   // cout << "DEBUG: in parseAssignment()\n";
+    //cout << "DEBUG: in parseAssignment()\n";
     Variable leftHand;
     VariableType rightHandType;
     token = tokenList[index];
@@ -380,9 +380,11 @@ VariableType Parser::parseExpression(Variable leftHand){
                     symbolTable.storeUnknown = 0; //reset this because it's in an assignment statement
                 }
             }
-            //if the left is unknown but the expression type is known
-            symbolTable.resolveUnknownVariables(leftHand.unknownNum, 0, expressionType);
-            symbolTable.storeUnknown = 0;
+            else{
+                //if the left is unknown but the expression type is known
+                symbolTable.resolveUnknownVariables(leftHand.unknownNum, 0, expressionType);
+                symbolTable.storeUnknown = 0;
+            }
         }
         //if the right is unknown but the left is known
         else if(expressionType == UNKNOWN && leftHand.type != UNKNOWN){
@@ -457,7 +459,7 @@ VariableType Parser::parseExpression(){
 }
 
 VariableType Parser::parseBinary(){
-    //cout << "DEBUG: in parseBinary()\n";
+    cout << "DEBUG: in parseBinary()\n";
     VariableType expressionType;
 
     VariableType leftType;
@@ -491,9 +493,11 @@ VariableType Parser::parseBinary(){
                     symbolTable.storeUnknown = leftUnknown;
                 }
             }
-            //if the left is unknown but the right is known
-            symbolTable.resolveUnknownVariables(leftUnknown, 0, rightType);
-            leftType = rightType;
+            else{
+                //if the left is unknown but the right is known
+                symbolTable.resolveUnknownVariables(leftUnknown, 0, rightType);
+                leftType = rightType;
+            }
         }
         //if the right is unknown but the left is known
         else if(rightType == UNKNOWN && leftType != UNKNOWN){
@@ -527,9 +531,11 @@ VariableType Parser::parseBinary(){
                     symbolTable.storeUnknown = 0;
                 }
             }
-            //if the left is unknown but the right is known
-            symbolTable.resolveUnknownVariables(leftUnknown, 0, rightType);
-            leftType = rightType;
+            else{
+                //if the left is unknown but the right is known
+                symbolTable.resolveUnknownVariables(leftUnknown, 0, rightType);
+                leftType = rightType;
+            }
         }
         //if the right is unknown but the left is known
         else if(rightType == UNKNOWN && leftType != UNKNOWN){
@@ -669,5 +675,7 @@ int main()
     //parse that list into actual output
     parser->parseProgram();
     parser->symbolTable.printVariableList();
+    cout << "DEBUG: end table is \n";
+    parser->symbolTable.debugPrintVariableList();
     return 1;
 }
