@@ -41,9 +41,6 @@ class VariableList{
     void printVariableList();
     void debugPrintVariableList();
 
-    private:
-    std::vector<int> printedUnknowns;
-
 
 };
 

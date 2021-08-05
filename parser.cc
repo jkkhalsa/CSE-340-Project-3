@@ -459,7 +459,7 @@ VariableType Parser::parseExpression(){
 }
 
 VariableType Parser::parseBinary(){
-    cout << "DEBUG: in parseBinary()\n";
+    //cout << "DEBUG: in parseBinary()\n";
     VariableType expressionType;
 
     VariableType leftType;
@@ -675,7 +675,5 @@ int main()
     //parse that list into actual output
     parser->parseProgram();
     parser->symbolTable.printVariableList();
-    cout << "DEBUG: end table is \n";
-    parser->symbolTable.debugPrintVariableList();
     return 1;
 }

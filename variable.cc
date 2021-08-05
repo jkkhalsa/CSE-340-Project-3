@@ -50,8 +50,6 @@ void VariableList::addKnownVariable(string n, VariableType t){
 
     //add it to the symbol table
     list.push_back(variable);
-    cout << "DEBUG: after adding " << variable.printVariable() << " the list is now ";
-    printVariableList();
     return;
 }
 
@@ -69,8 +67,6 @@ void VariableList::addUnknownVariable(string n, int u){
         variable.unknownNum = nextUnknown;
         nextUnknown++;
     }
-    cout << "DEBUG: after adding " << variable.printVariable() << " the list is now ";
-    printVariableList();
     list.push_back(variable);
     return;
 }
@@ -86,7 +82,7 @@ void VariableList::resolveUnknownVariables(int beingResolved, int resolvingTo, V
         for(int i = list.size()-1; i>=0; i--){
             if(list[i].type == UNKNOWN && list[i].unknownNum == beingResolved){
                 list[i].unknownNum = resolvingTo;
-                cout << "DEBUG: resolving variable " << list[i].name << " to type " << list[i].type << " and unknown " << list[i].unknownNum << "\n";
+                //cout << "DEBUG: resolving variable " << list[i].name << " to type " << list[i].type << " and unknown " << list[i].unknownNum << "\n";
             }
         }
     }
@@ -96,7 +92,7 @@ void VariableList::resolveUnknownVariables(int beingResolved, int resolvingTo, V
             if(list[i].type == UNKNOWN && list[i].unknownNum == beingResolved){
                 list[i].unknownNum = 0;
                 list[i].type = newType;
-                cout << "DEBUG: resolving variable " << list[i].name << " to type " << list[i].type << " and unknown " << list[i].unknownNum << "\n";
+                //cout << "DEBUG: resolving variable " << list[i].name << " to type " << list[i].type << " and unknown " << list[i].unknownNum << "\n";
             }
         }
     }
@@ -125,16 +121,14 @@ void VariableList::printVariableList(){
     string unknownString;
     int unknownPrinting;
     bool skipFirst = false;
+    vector <int> printedUnknowns;
     for(auto elem : list){
         if(elem.type != UNKNOWN){
             cout << elem.printVariable() << "\n";
         }
         else{
             unknownPrinting = elem.unknownNum;
-            //cout << "DEBUG: hit upon an unknown that might be in the already printed table\n";
-            //cout << "DEBUG: already printed table size is " << printedUnknowns.size() << "\n";
             if(count(printedUnknowns.begin(), printedUnknowns.end(), unknownPrinting) == 0){
-                //cout << "DEBUG: hit upon an unknown we need to print\n";
                 //if the unknown we hit upon isn't in the list of what's already been printed
                 unknownString = elem.printVariable();
                 skipFirst = false;
