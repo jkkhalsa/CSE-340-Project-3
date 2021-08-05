@@ -72,39 +72,6 @@ bool LexicalAnalyzer::SkipSpace()
     return space_encountered;
 }
 
-/*bool LexicalAnalyzer::SkipComments()
-{
-    bool comments = false;
-    char c;
-    if(input.EndOfInput() ){
-        input.UngetChar(c);
-        return comments;
-    }
-    input.GetChar(c);
-    if(c == '/'){
-        input.GetChar(c);
-        if(c == '/'){
-            comments = true;
-            while(c != '\n'){
-                comments = true;
-                input.GetChar(c);
-            }
-            line_no++;
-            SkipComments();
-        }
-        else{
-            comments = false;
-            cout << "Syntax Error\n";
-            exit(0);
-        }
-    }   
-    else{
-        input.UngetChar(c);
-        return comments;
-    }
-    return comments;
-}*/
-
 bool LexicalAnalyzer::IsKeyword(string s)
 {
     for (int i = 0; i < KEYWORDS_COUNT; i++) {
