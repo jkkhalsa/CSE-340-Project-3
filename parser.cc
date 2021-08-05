@@ -86,9 +86,7 @@ void Parser::parseProgram(){
     if(token.token_type == LBRACE){
         parseBody();
     }
-    else{
-        SyntaxError();
-    }
+    cout << "DEBUG: in parseProgram, checking for EOF\n";
     //if we're here, then we've got an end of file, hopefully
     token = tokenList[index];
     if(token.token_type == END_OF_FILE){
@@ -189,6 +187,7 @@ void Parser::parseBody(){
     //now statements wheeeeee
     parseStmtList();
     expect(RBRACE);
+    cout << "DEBUG: passed expecting rbrace in body\n";
     return;
 }
 
@@ -219,7 +218,10 @@ void Parser::parseStmtList(){
     }
     //statement list will always have either another statement list after it or the end of the body
     //might be a this token instead of a peek
-    if(Peek(1).token_type != RBRACE){
+    token = tokenList[index];
+    cout << "DEBUG: right after getting the next token, token is ";
+    token.Print();
+    if(token.token_type != RBRACE){
         parseStmtList();
     }
     return;
@@ -240,7 +242,6 @@ void Parser::parseAssignment(){
     index++;
 
     expect(EQUAL);
-    cout << "DEBUG: past expecting an equal\n";
 
     //now parse the expression on the right hand side
     //passing what's on the left so we can do unknown cleanup in expression
@@ -251,6 +252,7 @@ void Parser::parseAssignment(){
         cout << "TYPE MISMATCH " << token.line_no << " C1\n";
         exit(1);
     }
+    token = tokenList[index];
     
     expect(SEMICOLON);
     return;
@@ -272,7 +274,10 @@ VariableType Parser::parseExpression(Variable leftHand){
     //will either start with an id, num, realnum, binary operator, or unary operator
     //primary first because that just returns right back up after some cleanup
     token = tokenList[index];
+    cout << "DEBUG: token being parsed is ";
+    token.Print();
     if(token.token_type == ID){
+        cout << "DEBUG: found an ID in " << token.lexeme << "\n";
         //this is a variable = variable situation
         //search for the variable
         rightHand = symbolTable.searchList(token.lexeme);
@@ -292,7 +297,8 @@ VariableType Parser::parseExpression(Variable leftHand){
         }
         //we've made sense of this token
         index++;
-        return expressionType;
+        cout << "DEBUG: returning expression type " << expressionType << "\n";
+        return expressionType;;
     }
     else if(token.token_type == NUM){
         expressionType = INT;
@@ -358,7 +364,7 @@ VariableType Parser::parseExpression(Variable leftHand){
         //if we come back from parseUnary and there's a left-hand side, then that
         //left hand side must be unknown or BOOL or else there's a c1 mismatch
         if(leftHand.type != BOOL && leftHand.type != UNKNOWN){
-            cout << "TYPE MISMATCH " << token.line_no << " C1";
+            cout << "TYPE MISMATCH " << token.line_no << " C1\n";
         }
         //if the left hand side is unknown, we can go ahead and change it
         if(leftHand.type == UNKNOWN){
@@ -563,7 +569,7 @@ void Parser::parseUnary(){
     token = tokenList[index];
     rType = parseExpression();
     if(rType != BOOL && rType != UNKNOWN){
-        cout << "TYPE MISMATCH " << token.line_no << " C3";
+        cout << "TYPE MISMATCH " << token.line_no << " C3\n";
         exit(1);
     }
     //if the type is unknown, then we must have returned directly from a primary variable
@@ -581,7 +587,7 @@ void Parser::parseUnary(){
 }
 
 void Parser::parseIf(){
-    cout << "DEBUG: in parseIf()\n";
+    //cout << "DEBUG: in parseIf()\n";
     VariableType ifType;
     expect(LPAREN);
     ifType = parseExpression();
@@ -613,7 +619,7 @@ void Parser::parseWhile(){
 }
 
 void Parser::parseSwitch(){
-    cout << "DEBUG: in parseSwitch()\n";
+    //cout << "DEBUG: in parseSwitch()\n";
     VariableType switchType;
     expect(LPAREN);
     switchType = parseExpression();
